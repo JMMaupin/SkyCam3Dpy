@@ -1,6 +1,11 @@
 import eel
-import time
+import threading, time
 import math
+from GamePadXBox import controller_thread, get_controls
+
+# Start the controller thread
+thread = threading.Thread(target=controller_thread)
+thread.start()
 
 # Initialize eel with the directory containing the HTML files
 eel.init('web')
@@ -43,39 +48,57 @@ eel.start("index.html", size=(800, 600), block=False)
 # Send the static parameters once before the loop
 eel.upload_params(params)
 
-# Boucle while True pour la mise à jour en temps réel de dynParams
-while True:
-    # Exemple de mise à jour : ici, on peut définir la position du spar en fonction du temps
-    t = time.time()
-    dynParams["sparPosition"] = {
-        "x": 4 * math.sin(t),
-        "y": 2.2 +  2* math.sin(t/2),  # altitude fixe par exemple
-        "z": 2.5 * math.cos(t)
-    }
-    
-    # Exemple de recalcul des longueurs de cordes en fonction de la nouvelle position du spar
-    # (Vous devez ici réaliser votre propre calcul en fonction de vos besoins)
-    new_ropes = []
-    spar_width = params["spar"]["width"]
-    spar_length = params["spar"]["length"]
-    for mast in params["masts"]:
-        # Calcul simple de distance entre la position du mast et la position du spar
-        dx = mast["x"] - dynParams["sparPosition"]["x"]
-        dz = mast["z"] - dynParams["sparPosition"]["z"]
-        mast_top_y = mast["height"]  # en supposant que la partie haute du mât est à cette hauteur
-        dy = dynParams["sparPosition"]["y"] - mast_top_y
+try:
+    # Boucle while True pour la mise à jour en temps réel de dynParams
+    while True:
+        # Exemple de mise à jour : ici, on peut définir la position du spar en fonction du temps
+        t = time.time()
+        dynParams["sparPosition"] = {
+            "x": 4 * math.sin(t),
+            "y": 2.2 +  2* math.sin(t/2),  # altitude fixe par exemple
+            "z": 2.5 * math.cos(t)
+        }
         
-        # Ajustement des calculs en fonction de la largeur et de la longueur du spar
-        adjusted_dx = dx - spar_width / 2
-        adjusted_dz = dz - spar_length / 2
+        # Exemple de recalcul des longueurs de cordes en fonction de la nouvelle position du spar
+        # (Vous devez ici réaliser votre propre calcul en fonction de vos besoins)
+        new_ropes = []
+        spar=type('spar',(),{})
+        spar.width = params["spar"]["width"]
+        spar.length = params["spar"]["length"]
+        for mast in params["masts"]:
+            # Calcul simple de distance entre la position du mast et la position du spar
+            dx = mast["x"] - dynParams["sparPosition"]["x"]
+            dz = mast["z"] - dynParams["sparPosition"]["z"]
+            mast_top_y = mast["height"]  # en supposant que la partie haute du mât est à cette hauteur
+            dy = dynParams["sparPosition"]["y"] - mast_top_y
+            
+            # Ajustement des calculs en fonction de la largeur et de la longueur du spar
+            adjusted_dx = dx - spar.width / 2
+            adjusted_dz = dz - spar.length / 2
+            
+            new_length = math.sqrt(adjusted_dx**2 + dy**2 + adjusted_dz**2)
+            new_ropes.append({"length": round(new_length, 2)})
         
-        new_length = math.sqrt(adjusted_dx**2 + dy**2 + adjusted_dz**2)
-        new_ropes.append({"length": round(new_length, 2)})
-    
-    dynParams["ropes"] = new_ropes
+        dynParams["ropes"] = new_ropes
 
-    # Envoi continu des nouveaux dynParams vers la partie JS
-    eel.update_dynParams(dynParams)
-    
-    # Petite pause pour ne pas saturer la boucle
-    eel.sleep(0.01)
+        # Envoi continu des nouveaux dynParams vers la partie JS
+        eel.update_dynParams(dynParams)
+
+        # Exemple de récupération des contrôles de la manette
+        ctrl = get_controls()
+        if ctrl:
+            # Access and update control values here
+            axes_str = ', '.join([f"{value:.2f}" for value in ctrl.axes])
+            buttons_str = ', '.join([str(int(pressed)) for pressed in ctrl.buttons])
+            hats_str = ', '.join([f"({hat[0]}, {hat[1]})" for hat in ctrl.hats])
+            print(f"Main Loop - Axes: [{axes_str}], Buttons: [{buttons_str}], Hats: [{hats_str}]", end='\r')
+        
+
+        
+        # Petite pause pour ne pas saturer la boucle
+        eel.sleep(0.01)
+
+except KeyboardInterrupt:
+    print("Exiting...")
+finally:
+    thread.join()
