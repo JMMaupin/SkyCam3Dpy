@@ -10,7 +10,7 @@ def update_spar_from_js(x, y, z):
 
 def start_eel(params, dynParams):
     # Launch the eel application without blocking to allow updates
-    eel.start("index.html", size=(800, 600), block=False)
+    eel.start("index.html", size=(800, 600), port= 8060, block=False)
 
     # Send the static parameters once before the loop
     eel.upload_params(params)
@@ -21,4 +21,4 @@ def start_eel(params, dynParams):
         eel.update_dynParams(dynParams)
         
         # Petite pause pour ne pas saturer la boucle
-        eel.sleep(0.01)
+        eel.sleep(0.02)

@@ -290,17 +290,20 @@ function setupGUI() {
     params.masts.forEach((mast, i) => {
         mastFolder.add(mast, 'height', 1, 10).name(`Mast ${i+1}`).onChange(updateGeometry);
     });
+    mastFolder.close(); // Close the folder by default
     
     const positionFolder = gui.addFolder('Mast Position');
     params.masts.forEach((mast, i) => {
         positionFolder.add(mast, 'x', -10, 10).name(`Mast ${i+1} X`).onChange(updateGeometry);
         positionFolder.add(mast, 'z', -10, 10).name(`Mast ${i+1} Z`).onChange(updateGeometry);
     });
+    positionFolder.close(); // Close the folder by default
     
     const ropeFolder = gui.addFolder('Rope Length');
     dynParams.ropes.forEach((rope, i) => {
         ropeFolder.add(rope, 'length', 1, 10).name(`Rope ${i+1}`).onChange(updateGeometry);
     });
+    ropeFolder.close(); // Close the folder by default
     
     const sparFolder = gui.addFolder('Spar');
     sparFolder.add(params.spar, 'width', 0.1, 2).name('Width').onChange(() => {
@@ -313,10 +316,12 @@ function setupGUI() {
         spar.geometry = new THREE.PlaneGeometry(params.spar.width, params.spar.length);
         updateGeometry();
     });
+    sparFolder.close(); // Close the folder by default
     
     gui.add(params, 'showAxes').name('Show Axes').onChange(updateAxesHelper);
-}
 
+    gui.close(); // Close the folder by default
+}
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);

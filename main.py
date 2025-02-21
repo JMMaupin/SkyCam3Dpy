@@ -52,8 +52,9 @@ while True:
     # Exemple de recalcul des longueurs de cordes en fonction de la nouvelle position du spar
     # (Vous devez ici réaliser votre propre calcul en fonction de vos besoins)
     new_ropes = []
-    spar_width = params["spar"]["width"]
-    spar_length = params["spar"]["length"]
+    spar=type('spar',(),{})
+    spar.width = params["spar"]["width"]
+    spar.length = params["spar"]["length"]
     for mast in params["masts"]:
         # Calcul simple de distance entre la position du mast et la position du spar
         dx = mast["x"] - dynParams["sparPosition"]["x"]
@@ -62,8 +63,8 @@ while True:
         dy = dynParams["sparPosition"]["y"] - mast_top_y
         
         # Ajustement des calculs en fonction de la largeur et de la longueur du spar
-        adjusted_dx = dx - spar_width / 2
-        adjusted_dz = dz - spar_length / 2
+        adjusted_dx = dx - spar.width / 2
+        adjusted_dz = dz - spar.length / 2
         
         new_length = math.sqrt(adjusted_dx**2 + dy**2 + adjusted_dz**2)
         new_ropes.append({"length": round(new_length, 2)})
@@ -81,4 +82,4 @@ while True:
         print(f"Main Loop - Axes: [{axes_str}], Buttons: [{buttons_str}], Hats: [{hats_str}] , Ropes: [{ropes_str}] ",  end='\r')
     
     # Petite pause pour ne pas saturer la boucle
-    time.sleep(0.01)
+    time.sleep(0.02)
