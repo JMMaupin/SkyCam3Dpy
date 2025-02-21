@@ -7,9 +7,9 @@ import eel_app
 # Define the static parameters (sent once)
 params = {
     "masts": [
-        {"height": 5, "x": -5, "z": -3},
-        {"height": 5, "x": 5, "z": -3},
-        {"height": 5, "x": 5, "z": 3},
+        {"height": 4, "x": -4, "z": -3},
+        {"height": 4, "x": 4, "z": -3},
+        {"height": 5, "x": 5, "z": 2},
         {"height": 5, "x": -5, "z": 3}
     ],
     "spar": {

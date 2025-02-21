@@ -243,34 +243,7 @@ function updateGeometry() {
     });
 
     // Update spar position: use dynamic sparPosition if provided; otherwise, calculate center
-    if (dynParams.sparPosition) {
-        spar.position.set(dynParams.sparPosition.x, dynParams.sparPosition.y, dynParams.sparPosition.z);
-    } else {
-        let center = calculateCentralPosition();
-        spar.position.copy(center);
-    }
-
-    // Compute corners of the spar (assuming axis-aligned spar)
-    const halfWidth = params.spar.width / 2;
-    const halfLength = params.spar.length / 2;
-    const corners = [
-        new THREE.Vector3(spar.position.x - halfWidth, spar.position.y, spar.position.z - halfLength),
-        new THREE.Vector3(spar.position.x + halfWidth, spar.position.y, spar.position.z - halfLength),
-        new THREE.Vector3(spar.position.x + halfWidth, spar.position.y, spar.position.z + halfLength),
-        new THREE.Vector3(spar.position.x - halfWidth, spar.position.y, spar.position.z + halfLength)
-    ];
-
-    // Update each rope to connect the top of a mast to the corresponding spar corner
-    ropes.forEach((rope, i) => {
-        const mastTop = new THREE.Vector3(
-            masts[i].position.x,
-            masts[i].position.y + params.masts[i].height / 2,
-            masts[i].position.z
-        );
-        const points = [mastTop, corners[i]];
-        rope.geometry.setFromPoints(points);
-        rope.geometry.attributes.position.needsUpdate = true;
-    });
+    updateRopesAndSpar();
 
     // Update ground and axes visibility
     updateGround();
@@ -339,7 +312,40 @@ function upload_params(receivedParams) {
 eel.expose(update_dynParams);
 function update_dynParams(receivedDynParams) {
     Object.assign(dynParams, receivedDynParams);
-    updateGeometry();
+    updateRopesAndSpar();
+}
+
+// Function to update only ropes and spar based on dynamic parameters
+function updateRopesAndSpar() {
+    // Update spar position: use dynamic sparPosition if provided; otherwise, calculate center
+    if (dynParams.sparPosition) {
+        spar.position.set(dynParams.sparPosition.x, dynParams.sparPosition.y, dynParams.sparPosition.z);
+    } else {
+        let center = calculateCentralPosition();
+        spar.position.copy(center);
+    }
+
+    // Compute corners of the spar (assuming axis-aligned spar)
+    const halfWidth = params.spar.width / 2;
+    const halfLength = params.spar.length / 2;
+    const corners = [
+        new THREE.Vector3(spar.position.x - halfWidth, spar.position.y, spar.position.z - halfLength),
+        new THREE.Vector3(spar.position.x + halfWidth, spar.position.y, spar.position.z - halfLength),
+        new THREE.Vector3(spar.position.x + halfWidth, spar.position.y, spar.position.z + halfLength),
+        new THREE.Vector3(spar.position.x - halfWidth, spar.position.y, spar.position.z + halfLength)
+    ];
+
+    // Update each rope to connect the top of a mast to the corresponding spar corner
+    ropes.forEach((rope, i) => {
+        const mastTop = new THREE.Vector3(
+            masts[i].position.x,
+            masts[i].position.y + params.masts[i].height / 2,
+            masts[i].position.z
+        );
+        const points = [mastTop, corners[i]];
+        rope.geometry.setFromPoints(points);
+        rope.geometry.attributes.position.needsUpdate = true;
+    });
 }
 
 // Start everything
