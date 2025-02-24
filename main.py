@@ -135,8 +135,6 @@ while True:
             "z": 4 * math.cos(t)
         }
 
-
-
     # Limit the spar position within the defined bounds
     dynParams["sparPosition"] = limit_spar_position(cmdPosition, params)
     
